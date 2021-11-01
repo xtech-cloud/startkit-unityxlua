@@ -1,4 +1,4 @@
-local json = require 'encoding/json'
+local yaml = require 'encoding/yaml'
 local class = require 'oelMVCS.class'
 local Config = require 'oelMVCS.Config'
 local io = CS.System.IO
@@ -17,9 +17,9 @@ function UniConfig:LoadAll()
     for i=0, files.Length-1 do
         local file = files[i]
         local config_file = io.Path.Combine(dir_path, file)
-        local json_str = io.File.ReadAllText(config_file)
+        local yaml_str = io.File.ReadAllText(config_file)
         local filename = io.Path.GetFileNameWithoutExtension(file)
-        self.fields_[filename] = json:decode(json_str)
+        self.fields_[filename] = yaml.eval(yaml_str)
     end
 end
 

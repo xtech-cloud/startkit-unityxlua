@@ -67,6 +67,7 @@ Service.Options = Options
 function Service:_init()
     self.useMock = false
     self.MockProcessor = nil
+    self.asyncRequestImplement = nil
     -- #private
     self.board__ = nil
     self.aliasMap__ = {}
@@ -121,7 +122,11 @@ function Service:_send(_url, _method, _useMock, _params, _onReply, _onError, _op
 end
 
 function Service:_asyncRequest(_url, _method, _params, _onReply, _onError, _options)
-    _onError(Error.NewAccessErr("Not implemented"))
+    if nil == self.asyncRequestImplement then
+        _onError(Error.NewAccessErr("asyncRequest Not implemented"))
+        return
+    end
+    self.asyncRequestImplement(_url, _method, _params, _onReply, _onError, _options)
 end
 
 function Service:_post(_url, _params, _onReply, _onError, _options)

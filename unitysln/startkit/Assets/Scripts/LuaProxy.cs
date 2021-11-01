@@ -40,6 +40,7 @@ public class LuaProxy
         meta.Dispose();
 
         rootLuaEnv_.Global.Set<string, MonoBehaviour>("G_RootMono", rootMono);
+        rootLuaEnv_.Global.Set<string, MonoBehaviour>("G_CoroutineRunner", rootMono.gameObject.GetComponent<CoroutineRunner>());
         rootLuaEnv_.Global.Set<string, string>("G_Vendor", vendor);
         foreach (string path in searchPaths)
             addLoader(path);

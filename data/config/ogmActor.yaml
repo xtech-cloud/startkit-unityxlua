@@ -1,0 +1,28 @@
+# 模式，可选值为[standard,service]
+# standard: 在程序内进行通信
+# servie: 在单独的服务进程内通信
+mode: standard
+# 远端地址
+address: http://localhost
+# 域的UUID
+domain: 5034cc13c37fd9db00ccb118e3e81131
+# 同步信息
+sync:
+  # 方法，可选值为[push, pull]
+  # push: 推送数据到远端，并获取指定的数据
+  # pull: 从远端拉取指定的数据
+  method: pull
+  # 推送数据
+  push:
+    # 间隔时间（秒）
+    interval: 1
+    # 下行时需要得到的属性
+    downProperty:
+      - G.device.list
+  pull:
+    # 间隔时间（秒）
+    interval: 1
+    # 下行时需要得到的属性
+    downProperty:
+      # 设备列表
+      - G.device.list

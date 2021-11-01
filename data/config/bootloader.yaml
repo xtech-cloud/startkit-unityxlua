@@ -1,0 +1,11 @@
+# 需要引导加载的模块
+# name 为包的目录名
+# prefix为部件的文件前缀名
+# 注意：数组的顺序决定了模块的执行顺序
+bundle:
+  -
+    name: simple
+    prefix: Simple
+  -
+    name: ogmActor
+    prefix: Actor

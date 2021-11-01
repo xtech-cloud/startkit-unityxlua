@@ -6,6 +6,8 @@ local Framework = require 'oelMVCS.Framework'
 local mymvcs = require 'mymvcs'
 
 local mvcsFramework = nil
+local mvcsLogger = nil
+local mvcsConfig = nil
 
 function uniAwake()
     print('uniAwake')
@@ -18,20 +20,20 @@ function uniAwake()
     -- #begin
     mvcsFramework = Framework()
 
-    local logger = UniLogger()
-    logger:setLevel(6)
-    mvcsFramework:setLogger(logger)
+    mvcsLogger = UniLogger()
+    mvcsLogger:setLevel(6)
+    mvcsFramework:setLogger(mvcsLogger)
 
-    local config = UniConfig()
-    config:LoadAll()
-    mvcsFramework:setConfig(config)
+    mvcsConfig = UniConfig()
+    mvcsConfig:LoadAll()
+    mvcsFramework:setConfig(mvcsConfig)
     -- #end
 
     -- 初始化MVCS框架
     mvcsFramework:Initialize()
 
     -- 注册部件
-    mymvcs.Register(mvcsFramework, logger)
+    mymvcs.Register(mvcsFramework, mvcsLogger, mvcsConfig)
 end
 
 function uniEnable()
@@ -41,7 +43,7 @@ end
 
 function uniStart()
     print('uniStart')
-    mymvcs.Boot()
+    mymvcs.Boot(mvcsFramework, mvcsLogger, mvcsConfig)
 end
 
 function uniUpdate()
@@ -56,7 +58,7 @@ end
 function uniDestroy()
     print('uniDestroy')
     -- 注销部件
-    mymvcs.Cancel(mvcsFramework)
+    mymvcs.Cancel(mvcsFramework, mvcsLogger, mvcsConfig)
     mvcsFramework:Release()
 end
 
