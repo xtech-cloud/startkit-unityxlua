@@ -5,13 +5,13 @@ mode: standard
 # 远端地址
 address: http://localhost
 # 域的UUID
-domain: 5034cc13c37fd9db00ccb118e3e81131
+domain: 9ed92fbad0fe0d27ae8a1881f431c4d9
 # 同步信息
 sync:
   # 方法，可选值为[push, pull]
   # push: 推送数据到远端，并获取指定的数据
   # pull: 从远端拉取指定的数据
-  method: pull
+  method: push
   # 推送数据
   push:
     # 间隔时间（秒）

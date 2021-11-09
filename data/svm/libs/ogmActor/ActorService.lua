@@ -74,7 +74,7 @@ function ActorService:RunAndroid()
 end
 
 function ActorService:_push(_coroutineRunner)
-    local uri = self.config__.address..'/actor/Sync/Push'
+    local uri = self.config__.address..'/ogm/actor/Sync/Push'
     -- 参数列表
     local parameter = {}
     parameter.domain = self.config__.domain
@@ -122,7 +122,7 @@ function ActorService:_push(_coroutineRunner)
 end
 
 function ActorService:_pull(_coroutineRunner)
-    local uri = self.config__.address..'/actor/Sync/Pull'
+    local uri = self.config__.address..'/ogm/actor/Sync/Pull'
     -- 参数列表
     local parameter = {}
     parameter.domain = self.config__.domain
