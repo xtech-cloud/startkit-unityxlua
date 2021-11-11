@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.PowerManager;
+
 import android.util.Log;
 
 public class ActorService extends Service {
@@ -50,6 +51,9 @@ public class ActorService extends Service {
         }catch (Exception ex) {
             ex.printStackTrace();
         }
+
+
+        //startForeground(1, notification);
 
         // 启动守护服务
         daemon_ = new Daemon();

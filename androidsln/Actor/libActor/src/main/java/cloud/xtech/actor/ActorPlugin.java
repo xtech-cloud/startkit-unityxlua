@@ -63,6 +63,7 @@ public class ActorPlugin {
     {
         Log.i("ActorPlugin", "run service");
         service_ = new Intent(ActorData.activity , ActorService.class);
+        //ActorData.activity .startForegroundService(service_);
         ActorData.activity .startService(service_);
     }
 
