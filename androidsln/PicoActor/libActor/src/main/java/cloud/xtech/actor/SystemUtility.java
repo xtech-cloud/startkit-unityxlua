@@ -114,6 +114,8 @@ public class SystemUtility {
 
 
 
+
+
     /// \beirf 获取设备序列号
     public static String getSerialNumber(){
         String serial = null;
@@ -309,6 +311,9 @@ public class SystemUtility {
 
     public static void runAPK(String _package)
     {
+        if(ActorData.activeApplication.equalsIgnoreCase(_package))
+            return;
+
         // 如果当前正在运行其他应用，先退出
         if(!ActorData.activeApplication.isEmpty())
         {
@@ -332,27 +337,24 @@ public class SystemUtility {
             ex.printStackTrace();
         }
 
+        Log.e("ActorPlugin", "run "+_package+" success ......");
         ActorData.activeApplication = _package;
     }
 
     public static void killAPK() {
         Log.i("ActorPlugin", "kill application: " + ActorData.activeApplication);
 
-        ActorData.activeApplication = "";
-
         //最优先将大厅切换到前台
-        final ActivityManager am = (ActivityManager) ActorData.activity.getSystemService(ACTIVITY_SERVICE) ;
-        am.moveTaskToFront(ActorData.activity.getTaskId(), ActivityManager.MOVE_TASK_WITH_HOME);
+        //final ActivityManager am = (ActivityManager) ActorData.activity.getSystemService(ACTIVITY_SERVICE) ;
+        //am.moveTaskToFront(ActorData.activity.getTaskId(), ActivityManager.MOVE_TASK_WITH_HOME);
 
-        //延迟2秒杀掉应用进程
-        Timer mTimer = new Timer();
-        TimerTask mTimerTask = new TimerTask() {
-            @Override
-            public void run() {
-                am.killBackgroundProcesses(ActorData.activeApplication);
-            }
-        };
-        mTimer.schedule(mTimerTask, 2000);
+        try {
+            ToBServiceHelper.getInstance().getServiceBinder().pbsKillAppsByPidOrPackageName(null, new String[]{ActorData.activeApplication}, 0);
+        } catch (RemoteException e) {
+            Log.e("ActorPlugin", e.getMessage());
+        }
+        Log.e("ActorPlugin", "kill "+ActorData.activeApplication+" success ......");
+        ActorData.activeApplication = "";
     }
 
     public static void InstallApk(String _filepath)

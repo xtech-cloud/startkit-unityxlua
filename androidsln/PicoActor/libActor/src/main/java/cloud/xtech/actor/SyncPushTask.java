@@ -55,6 +55,7 @@ class SyncReply
     private int access;
     private String alias;
     private Map<String,String> property;
+    private Map<String,String> task;
 
     public SyncReply()
     {
@@ -62,6 +63,7 @@ class SyncReply
         access = 0;
         alias = "";
         property = new HashMap<String,String>();
+        task = new HashMap<String,String>();
     }
 
     public ReplyStatus getStatus() {
@@ -94,6 +96,14 @@ class SyncReply
 
     public void setProperty(Map<String, String> property) {
         this.property = property;
+    }
+
+    public Map<String, String> getTask() {
+        return task;
+    }
+
+    public void setTask(Map<String, String> task) {
+        this.task = task;
     }
 }
 
@@ -203,12 +213,24 @@ public class SyncPushTask extends AsyncTask<Void, Void, Void> {
             data.put("device", device);
 
             JSONObject upProperty = new JSONObject();
-            upProperty.put("device.serialnumber."+SystemUtility.getSerialNumber()+".application.md5", ActorData.localApplicationMD5);
-            upProperty.put("device.serialnumber."+SystemUtility.getSerialNumber()+".upgrade.progress", ActorData.upgradeProgress);
+            upProperty.put("_.device.serialnumber."+SystemUtility.getSerialNumber()+".application.md5", ActorData.localApplicationMD5);
+            upProperty.put("_.device.serialnumber."+SystemUtility.getSerialNumber()+".upgrade.progress", ActorData.upgradeProgress);
+            data.put("upProperty", upProperty);
+
+            JSONArray task = new JSONArray();
+            for(String cmd:ActorData.taskFinish) {
+                task.put(cmd);
+            }
+            data.put("task", task);
+            ActorData.taskFinish.clear();
+
+            upProperty.put("_.device.serialnumber."+SystemUtility.getSerialNumber()+".application.md5", ActorData.localApplicationMD5);
+            upProperty.put("_.device.serialnumber."+SystemUtility.getSerialNumber()+".upgrade.progress", ActorData.upgradeProgress);
             data.put("upProperty", upProperty);
 
             JSONArray downProperty = new JSONArray();
             downProperty.put("_.domain.application.md5");
+
             for(int i=0;i<downPropertyAry.size();i++)
             {
                 downProperty.put(downPropertyAry.get(i));
@@ -247,6 +269,9 @@ public class SyncPushTask extends AsyncTask<Void, Void, Void> {
                     }
                 }
             }
+
+            ActorData.taskWaiting = reply.getTask();
+            Task.execute();
         }
 
             /*
