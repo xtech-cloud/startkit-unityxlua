@@ -2,6 +2,8 @@ package cloud.xtech.actor;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -20,10 +22,16 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class SystemInfo {
+import static android.content.Context.ACTIVITY_SERVICE;
+
+public class SystemUtility {
     private static WifiManager wifiManager_ = null;
     private static AudioManager audioManager_ = null;
     private static PowerManager powerManager_ = null;
@@ -34,7 +42,7 @@ public class SystemInfo {
         wifiManager_ = (WifiManager) _activity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         audioManager_ = (AudioManager) _activity .getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
         powerManager_ = (PowerManager) _activity.getApplicationContext().getSystemService(Context.POWER_SERVICE);
-        activityManager_ = (ActivityManager)  _activity.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+        activityManager_ = (ActivityManager)  _activity.getApplicationContext().getSystemService(ACTIVITY_SERVICE);
 
         Log.i("ActorPlugin", "BRAND: " + Build.BRAND);
         Log.i("ActorPlugin", "MODEL: " + Build.MODEL);
@@ -119,7 +127,6 @@ public class SystemInfo {
         catch (Exception e){
             e.printStackTrace();
         }
-
     }
 
 
@@ -239,5 +246,100 @@ public class SystemInfo {
     /// \brief 熄屏
     public static void screenOff() {
 
+    }
+
+    public static void runAPK(String _package)
+    {
+        // 如果当前正在运行其他应用，先退出
+        if(!ActorData.activeApplication.isEmpty())
+        {
+            killAPK();
+        }
+        Intent intent = ActorData.activity .getPackageManager().getLaunchIntentForPackage(_package);
+        if(intent == null)
+        {
+            Log.e("ActorPlugin", "package " + _package + " not found");
+            return ;
+        }
+
+        //运行应用，大厅切换到后台
+        try
+        {
+            ActorData.activity .startActivity(intent);
+        }
+        catch (ActivityNotFoundException ex)
+        {
+            Log.e("ActorPlugin", ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    public static void killAPK() {
+        Log.i("ActorPlugin", "kill application: " + ActorData.activeApplication);
+
+        //最优先将大厅切换到前台
+        final ActivityManager am = (ActivityManager) ActorData.activity.getSystemService(ACTIVITY_SERVICE) ;
+        am.moveTaskToFront(ActorData.activity.getTaskId(), ActivityManager.MOVE_TASK_WITH_HOME);
+
+        //延迟2秒杀掉应用进程
+        Timer mTimer = new Timer();
+        TimerTask mTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                am.killBackgroundProcesses(ActorData.activeApplication);
+            }
+        };
+        mTimer.schedule(mTimerTask, 2000);
+    }
+
+    public static void InstallApk(String _filepath)
+    {
+        Log.e("ActorPlugin", "================================================================================");
+        Log.e("ActorPlugin", "ready to install:" + _filepath);
+
+        String[] args = {"pm", "install", "-r", _filepath};
+        String result = apkProcess(args);
+        Log.e("ActorPlugin", "install log:" + result);
+    }
+
+    public static String apkProcess(String[] args) {
+        String result = null;
+        ProcessBuilder processBuilder = new ProcessBuilder(args);
+        Process process = null;
+        InputStream errIs = null;
+        InputStream inIs = null;
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            int read = -1;
+            process = processBuilder.start();
+            errIs = process.getErrorStream();
+            while ((read = errIs.read()) != -1) {
+                baos.write(read);
+            }
+            baos.write('\n');
+            inIs = process.getInputStream();
+            while ((read = inIs.read()) != -1) {
+                baos.write(read);
+            }
+            byte[] data = baos.toByteArray();
+            result = new String(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (errIs != null) {
+                    errIs.close();
+                }
+                if (inIs != null) {
+                    inIs.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (process != null) {
+                process.destroy();
+            }
+        }
+        return result;
     }
 }

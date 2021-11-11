@@ -23,7 +23,7 @@ public class ActorPlugin {
     public static void InjectActivity(Activity _activity) {
         Log.i("ActorPlugin", "inject activity: " + _activity.toString());
         ActorData.activity  = _activity;
-        SystemInfo.Setup(_activity);
+        SystemUtility.Setup(_activity);
     }
 
     /// \brief Unity调用此函数完成插件初始化

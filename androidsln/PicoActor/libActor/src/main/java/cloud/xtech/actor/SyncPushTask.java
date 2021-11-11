@@ -202,6 +202,11 @@ public class SyncPushTask extends AsyncTask<Void, Void, Void> {
             device.put("networkStrength", SystemUtility.getNetworkStrength());
             data.put("device", device);
 
+            JSONObject upProperty = new JSONObject();
+            upProperty.put("device.serialnumber."+SystemUtility.getSerialNumber()+".application.md5", ActorData.localApplicationMD5);
+            upProperty.put("device.serialnumber."+SystemUtility.getSerialNumber()+".upgrade.progress", ActorData.upgradeProgress);
+            data.put("upProperty", upProperty);
+
             JSONArray downProperty = new JSONArray();
             downProperty.put("_.domain.application.md5");
             for(int i=0;i<downPropertyAry.size();i++)
@@ -224,20 +229,23 @@ public class SyncPushTask extends AsyncTask<Void, Void, Void> {
         if(!upgrader.IsRunning())
         {
             String applicationMD5 = "";
+            boolean needUpgrade = false;
             if(reply.getProperty().containsKey("_.domain.application.md5"))
             {
                 applicationMD5 = reply.getProperty().get("_.domain.application.md5");
-                if(upgrader.Check(applicationMD5))
+                needUpgrade = upgrader.Check(applicationMD5);
+                if(needUpgrade)
                 {
-                    downPropertyAry.add("_.domain.application.manifest");
+                    if(reply.getProperty().containsKey("_.domain.application.manifest"))
+                    {
+                        String applicationManifest = reply.getProperty().get("_.domain.application.manifest");
+                        upgrader.Upgrade(applicationManifest);
+                    }
+                    else
+                    {
+                        downPropertyAry.add("_.domain.application.manifest");
+                    }
                 }
-            }
-
-            String applicationManifest = "";
-            if(reply.getProperty().containsKey("_.domain.application.manifest"))
-            {
-                applicationManifest = reply.getProperty().get("_.domain.application.manifest");
-                upgrader.Upgrade(applicationMD5, applicationManifest);
             }
         }
 

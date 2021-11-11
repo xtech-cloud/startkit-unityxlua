@@ -91,13 +91,14 @@ public class Upgrader
     private UpgraderTask task;
     private LinkedList<Application> applicationList;
     private Gson gson;
-    private String md5;
+    private String remoteMD5;
     private Application currentApplication;
 
     private UpgraderListener listener = new UpgraderListener() {
         @Override
         public void onProgress(int progress) {
             status.setProgress(progress);
+            ActorData.upgradeProgress = String.valueOf(progress);
             UnityPlayer.UnitySendMessage("__ACTOR__", "HandleActorUpgradeStatus", gson.toJson(status));
         }
 
@@ -120,8 +121,7 @@ public class Upgrader
             String apkfile = directory + currentApplication.getName();
 
             // 安装
-            //SystemUtility.InstallApk(_filepath);
-            //SystemUtility.runAPK("cloud.xtech.Neo3Demo", "com.unity3d.player.UnityPlayerActivity");
+            SystemUtility.InstallApk(_filepath);
             download();
         }
 
@@ -151,18 +151,13 @@ public class Upgrader
 
     public boolean Check(String _md5)
     {
+        remoteMD5 = _md5;
+
+        Log.i("ActorPlugin", "check upgrade:" + _md5);
         if(_md5.isEmpty())
             return false;
-        Log.i("ActorPlugin", "check upgrade:" + _md5);
-        return true;
-    }
 
-    public void Upgrade(String _md5, String _manifest)
-    {
-        md5 = _md5;
-        if(_manifest.isEmpty())
-            return;
-
+        boolean needUpgrade = false;
         // 判断整个清单是否已经更新过
         String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/";
         String md5file = directory + "upgrade.md5";
@@ -174,16 +169,28 @@ public class Upgrader
                 int length = fis.available();
                 byte[] buffer = new byte[length];
                 fis.read(buffer);
-                String res = new String(buffer);
+                ActorData.localApplicationMD5  = new String(buffer);
                 fis.close();
-                if(res.equalsIgnoreCase(_md5))
-                {
-                    //return;
-                }
+                needUpgrade = !ActorData.localApplicationMD5 .equalsIgnoreCase(_md5);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        else
+        {
+            needUpgrade = true;
+        }
+
+        return needUpgrade;
+    }
+
+    public void Upgrade(String _manifest)
+    {
+        if(_manifest.isEmpty())
+            return;
+
+        if(task != null)
+            return;
 
         byte[] json = Base64.decode(_manifest, Base64.URL_SAFE);
         String manifest = new String(json);
@@ -191,6 +198,8 @@ public class Upgrader
         gson = new Gson();
         Application[] applicationAry = gson.fromJson(manifest, new TypeToken<Application[]>(){}.getType());
         applicationList = new LinkedList<Application>();
+
+        String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/";
         for (int i = 0; i< applicationAry.length; i++)
         {
             // 只处理自动更新的
@@ -198,8 +207,8 @@ public class Upgrader
             {
                 // 忽略已经更新过的
                 String md5 = "";
-                md5file = directory + applicationAry[i].getUUID() + ".md5";
-                file = new File(md5file);
+                String md5file = directory + applicationAry[i].getUUID() + ".md5";
+                File file = new File(md5file);
                 if(file.exists())
                 {
                     try {
@@ -239,7 +248,7 @@ public class Upgrader
             String md5file = directory + "upgrade.md5";
             try {
                 FileOutputStream fos = new FileOutputStream(md5file);
-                fos.write(md5.getBytes());
+                fos.write(remoteMD5.getBytes());
                 fos.flush();
                 fos.close();
             } catch (IOException e) {
