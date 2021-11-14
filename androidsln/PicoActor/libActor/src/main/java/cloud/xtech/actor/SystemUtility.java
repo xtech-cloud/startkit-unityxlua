@@ -110,12 +110,6 @@ public class SystemUtility {
         }
     }
 
-
-
-
-
-
-
     /// \beirf 获取设备序列号
     public static String getSerialNumber(){
         String serial = null;
@@ -394,47 +388,6 @@ public class SystemUtility {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-    }
-
-    public static String apkProcess(String[] args) {
-        String result = null;
-        ProcessBuilder processBuilder = new ProcessBuilder(args);
-        Process process = null;
-        InputStream errIs = null;
-        InputStream inIs = null;
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            int read = -1;
-            process = processBuilder.start();
-            errIs = process.getErrorStream();
-            while ((read = errIs.read()) != -1) {
-                baos.write(read);
-            }
-            baos.write('\n');
-            inIs = process.getInputStream();
-            while ((read = inIs.read()) != -1) {
-                baos.write(read);
-            }
-            byte[] data = baos.toByteArray();
-            result = new String(data);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (errIs != null) {
-                    errIs.close();
-                }
-                if (inIs != null) {
-                    inIs.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            if (process != null) {
-                process.destroy();
-            }
-        }
-        return result;
     }
 
     public static int RunCommand(String command) {

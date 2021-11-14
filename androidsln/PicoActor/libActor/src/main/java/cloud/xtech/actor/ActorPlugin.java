@@ -1,7 +1,6 @@
 package cloud.xtech.actor;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.util.Log;
 
 public class ActorPlugin {

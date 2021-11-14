@@ -25,6 +25,8 @@ public class ActorService extends Service
         Log.i("ActorPlugin", "run SyncPush Task ...");
         syncPushTask = new SyncPushTask(ActorData.address,  ActorData.port, ActorData.pushInterval, ActorData.domain);
         syncPushTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        
     }
 
     @Override
