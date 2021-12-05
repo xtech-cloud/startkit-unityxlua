@@ -3,9 +3,9 @@
 # servie: 在单独的服务进程内通信
 mode: standard
 # 远端地址
-address: http://localhost
+address: http://172.16.10.52:9080
 # 域的UUID
-domain: 9ed92fbad0fe0d27ae8a1881f431c4d9
+domain:  2d99aef8463b1efd03b47736b32fe015
 # 同步信息
 sync:
   # 方法，可选值为[push, pull]

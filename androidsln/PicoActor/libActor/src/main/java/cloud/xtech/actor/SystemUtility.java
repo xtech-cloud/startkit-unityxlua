@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
+import android.media.projection.MediaProjectionManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
@@ -41,14 +42,17 @@ public class SystemUtility {
     private static AudioManager audioManager_ = null;
     private static PowerManager powerManager_ = null;
     private static ActivityManager activityManager_ = null;
+    private static MediaProjectionManager mediaProjectionManager_ = null;
+    private static CaptureListener captureListener_ = null;
 
     public static void Setup(Activity _activity)
     {
         wifiManager_ = (WifiManager) _activity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         audioManager_ = (AudioManager) _activity .getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
         powerManager_ = (PowerManager) _activity.getApplicationContext().getSystemService(Context.POWER_SERVICE);
-        activityManager_ = (ActivityManager)  _activity.getApplicationContext().getSystemService(ACTIVITY_SERVICE);
-
+        activityManager_ = (ActivityManager)  _activity.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+        mediaProjectionManager_ = (MediaProjectionManager)  _activity.getApplicationContext().getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        captureListener_ = new CaptureListener(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Pictures/Screenshots");
         Log.i("ActorPlugin", "BRAND: " + Build.BRAND);
         Log.i("ActorPlugin", "MODEL: " + Build.MODEL);
         Log.i("ActorPlugin", "PRODUCT: " + Build.PRODUCT);
@@ -76,6 +80,7 @@ public class SystemUtility {
 
     public static  void Initialize()
     {
+        captureListener_.startWatching();
         // 绑定服务
         ToBServiceHelper.getInstance().bindTobService(ActorData.activity.getApplicationContext());
         ActorServiceHelper.getInstance().bindTobService(ActorData.activity.getApplicationContext());
@@ -83,6 +88,7 @@ public class SystemUtility {
 
     public static  void Release()
     {
+        captureListener_.stopWatching();
         // 解绑服务
         ToBServiceHelper.getInstance().unBindTobService(ActorData.activity.getApplicationContext());
         ActorServiceHelper.getInstance().unBindTobService(ActorData.activity.getApplicationContext());
@@ -403,5 +409,11 @@ public class SystemUtility {
         } finally {
             process.destroy();
         }
+    }
+
+    public static void Capture()
+    {
+        Intent captureIntent = mediaProjectionManager_.createScreenCaptureIntent();
+        ActorData.activity.startActivityForResult(captureIntent, 1);
     }
 }

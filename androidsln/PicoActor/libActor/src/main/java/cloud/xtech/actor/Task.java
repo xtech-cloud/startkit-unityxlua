@@ -1,5 +1,6 @@
 package cloud.xtech.actor;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.util.Log;
 
@@ -82,40 +83,10 @@ public class Task
 
     private static void doSystemCapture()
     {
-        Bitmap capture = takeScreenShot();
-        if(null == capture)
-        {
-            Log.e("ActorPlugin", "capture failed");
-            return;
-        }
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        capture.compress(Bitmap.CompressFormat.JPEG, 50, baos);
-        byte[] datas = baos.toByteArray();
-        Log.e("ActorPlugin", "capture success , size is " + datas.length);
-    }
-
-    public static Bitmap takeScreenShot() {
-        Bitmap bmp = null;
-        float[] dims = {(float) 1920, (float) 1080};
-        float degrees = 0;
-
-        try {
-            Class<?> demo = Class.forName("android.view.SurfaceControl");
-            Method method = demo.getMethod("screenshot", new Class[]{Integer.TYPE, Integer.TYPE});
-            bmp = (Bitmap) method.invoke(demo, new Object[]{Integer.valueOf((int) dims[0]), Integer.valueOf((int) dims[1])});
-            if (bmp == null) {
-                Log.e("ActorPlugin", "bmp is null");
-                return null;
-            }
-
-            bmp.setHasAlpha(false);
-            bmp.prepareToDraw();
-            return bmp;
-        } catch (Exception e) {
-            Log.e("ActorPlugin", e.getMessage());
-            return bmp;
-        }
-
+        Intent intent = new Intent("pvr.intent.action.CAPTURE");
+        intent.setPackage("com.pvr.shortcut");
+        intent.putExtra("action_type", 2);
+        ActorData.activity.startService(intent);
+        //SystemUtility.Capture();
     }
 }

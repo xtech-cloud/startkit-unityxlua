@@ -10,6 +10,7 @@ import android.util.Log;
 public class ActorService extends Service
 {
     private SyncPushTask syncPushTask = null;
+    private SyncCaptureUploadTask syncCaptureUploadTask = null;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -26,7 +27,9 @@ public class ActorService extends Service
         syncPushTask = new SyncPushTask(ActorData.address,  ActorData.port, ActorData.pushInterval, ActorData.domain);
         syncPushTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        
+        Log.i("ActorPlugin", "run CaptureUpload Task ...");
+        syncCaptureUploadTask = new SyncCaptureUploadTask(ActorData.address,  ActorData.port, ActorData.pushInterval, ActorData.domain);
+        syncCaptureUploadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
@@ -42,6 +45,9 @@ public class ActorService extends Service
 
         Log.i("ActorPlugin", "stop SyncPush Task ...");
         syncPushTask.cancel(true);
+
+        Log.i("ActorPlugin", "stop CaptureUpload Task ...");
+        syncCaptureUploadTask.cancel(true);
     }
 }
 

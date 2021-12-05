@@ -147,6 +147,7 @@ public class SyncPushTask extends AsyncTask<Void, Void, Void> {
                 conn.setUseCaches(false);
                 //设置content-type
                 conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("apikey", ActorData.apikey);
 
                 String req_json = buildRequestJson();
                 DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
@@ -155,6 +156,7 @@ public class SyncPushTask extends AsyncTask<Void, Void, Void> {
                 dos.flush();
                 dos.close();
 
+                Log.i("ActorPlugin", "StatusCode: " + String.valueOf(conn.getResponseCode()));
                 if(conn.getResponseCode() == HttpURLConnection.HTTP_OK)
                 {
                     InputStreamReader isr = new InputStreamReader(conn.getInputStream());
@@ -169,22 +171,18 @@ public class SyncPushTask extends AsyncTask<Void, Void, Void> {
                     conn.disconnect();
                     processResponse(reply);
                 }
-                else
-                {
-                    Log.e("StatusCode: ", String.valueOf(conn.getResponseCode()));
-                }
             } catch (ProtocolException e) {
-                e.printStackTrace();
+                Log.e("ActorPlugin", e.getMessage());
             } catch (MalformedURLException e) {
-                e.printStackTrace();
+                Log.e("ActorPlugin", e.getMessage());
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e("ActorPlugin", e.getMessage());
             }
 
             try {
                 Thread.sleep(interval_);
             } catch (InterruptedException  e) {
-                e.printStackTrace();
+                Log.e("ActorPlugin", e.getMessage());
             }
         }
         return null;
@@ -215,6 +213,7 @@ public class SyncPushTask extends AsyncTask<Void, Void, Void> {
             JSONObject upProperty = new JSONObject();
             upProperty.put("_.device.serialnumber."+SystemUtility.getSerialNumber()+".application.md5", ActorData.localApplicationMD5);
             upProperty.put("_.device.serialnumber."+SystemUtility.getSerialNumber()+".upgrade.progress", ActorData.upgradeProgress);
+            upProperty.put("_.device.serialnumber."+SystemUtility.getSerialNumber()+".application", ActorData.activeApplication);
             data.put("upProperty", upProperty);
 
             JSONArray task = new JSONArray();
@@ -223,10 +222,6 @@ public class SyncPushTask extends AsyncTask<Void, Void, Void> {
             }
             data.put("task", task);
             ActorData.taskFinish.clear();
-
-            upProperty.put("_.device.serialnumber."+SystemUtility.getSerialNumber()+".application.md5", ActorData.localApplicationMD5);
-            upProperty.put("_.device.serialnumber."+SystemUtility.getSerialNumber()+".upgrade.progress", ActorData.upgradeProgress);
-            data.put("upProperty", upProperty);
 
             JSONArray downProperty = new JSONArray();
             downProperty.put("_.domain.application.md5");
@@ -238,7 +233,7 @@ public class SyncPushTask extends AsyncTask<Void, Void, Void> {
             downPropertyAry.clear();
             data.put("downProperty", downProperty);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("ActorPlugin", e.getMessage());
         }
         return data.toString();
     }

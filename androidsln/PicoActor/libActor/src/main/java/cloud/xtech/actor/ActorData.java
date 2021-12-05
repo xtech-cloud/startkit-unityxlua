@@ -14,6 +14,7 @@ public class ActorData
     public static String domain = "";
     public static String address = "";
     public static int port = 0;
+    public static String apikey  = "";
     public static int pushInterval = 1000;
 
     // 本地的应用清单md5
@@ -27,4 +28,7 @@ public class ActorData
 
     // 当前执行的apk的包名
     public static String activeApplication = "";
+
+    // 最新的截图
+    public static byte[] latestCapture = null;
 }

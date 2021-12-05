@@ -58,6 +58,11 @@ public class ActorPlugin {
         ActorData.port = _port;
     }
 
+    public static void SetApiKey(String _apikey) {
+        Log.i("ActorPlugin", "SetApiKey: " + _apikey);
+        ActorData.apikey = _apikey;
+    }
+
     public static void SetPushInterval(int _interval)
     {
         Log.i("ActorPlugin", "SetPushInterval:" + _interval);
